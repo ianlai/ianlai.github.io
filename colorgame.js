@@ -5,6 +5,7 @@ var numSquares = 6;
 
 //Score 
 var gameRound = 1;
+var gameRoundMax = 5; 
 var oneRoundScore = 0;
 var score = 0;
 
@@ -40,7 +41,7 @@ function newRound() {
     messageDisplay.textContent = "";
     h1.style.background = "rgb(62,1,175)";
     
-    messageDisplay.textContent = "Round: " + gameRound;
+    messageDisplay.textContent = "Round: " + gameRound + " / " + gameRoundMax;
     oneRoundScore = numSquares * 10 - 10;
 }
 function reset(){
@@ -56,12 +57,12 @@ function squareListener(){
         h1.style.background = clickedColor;
         
         score += oneRoundScore;
-        scoreDisplay.textContent = score * 2;
-        if(gameRound === 5){
+        scoreDisplay.textContent = "Your score is " + score * 4;
+        if(gameRound === gameRoundMax){
             gameOver();
         } else {
-            gameRound += 1;    
-            newRound();
+            gameRound += 1; 
+            setTimeout(newRound,1000);
         }
     } else {
         this.style.background = "#232323";
@@ -87,9 +88,12 @@ function setSquaresDisplay(color) {
         squares[i].style.visibility = "hidden";
     }
     for (var i = 0; i < colors.length; i++) {
-        squares[i].style.visibility = "visible";
-        squares[i].style.background = colors[i];
+        setTimeout(setOneSquaresDisplay.bind(null,i), 500+i*200);
     }
+}
+function setOneSquaresDisplay(i){
+    squares[i].style.visibility = "visible";
+    squares[i].style.background = colors[i];
 }
 function setButtonListener(color) {
     easyBtn.addEventListener("click", function() {

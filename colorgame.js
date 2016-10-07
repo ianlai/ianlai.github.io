@@ -20,6 +20,9 @@ var resetBtn = document.querySelector("#resetBtn");
 var easyBtn = document.querySelector("#easyBtn");
 var hardBtn = document.querySelector("#hardBtn");
 
+var wrongSound = document.getElementById("wrongSound");
+var correctSound = document.getElementById("correctSound");
+
 init();
 
 function init() {
@@ -39,7 +42,7 @@ function newRound() {
     colorDisplay.textContent = pickedColor;
     setSquaresDisplay();
     messageDisplay.textContent = "";
-    h1.style.background = "rgb(62,1,175)";
+    h1.style.background = "rgb(23,78,140)";
     
     messageDisplay.textContent = "Round: " + gameRound + " / " + gameRoundMax;
     oneRoundScore = numSquares * 10 - 10;
@@ -49,10 +52,11 @@ function reset(){
 }
 function squareListener(){
     var clickedColor = this.style.background;
-
+    
     if (clickedColor === pickedColor) {
         messageDisplay.textContent = "Correct!!";
         resetBtn.textContent = "Replay";
+        correctSound.play();
         changeAllSquaresColor(pickedColor);
         h1.style.background = clickedColor;
         
@@ -66,6 +70,7 @@ function squareListener(){
         }
     } else {
         this.style.background = "#232323";
+        wrongSound.play();
         //messageDisplay.textContent = "Try again";
 
         oneRoundScore -= 10;

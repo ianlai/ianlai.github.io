@@ -3,11 +3,19 @@ var pickedColor;
 var mode;
 var numSquares = 6;
 
-//Score 
+//Score system
 var gameRound = 1;
 var gameRoundMax = 5; 
 var oneRoundScore = 0;
 var score = 0;
+var missPenalty = 10;  //show score will be 4 times (miss penalty = 40)
+var missPenaltySum = 0;
+var timePenalty = 1;   //show score will be 4 times (time penalty = 4 for each 3 sec)
+var timePenaltySum = 0;
+var progress = 150;
+
+var penaltyTimer;
+var progressTimer;
 
 //View
 var h1 = document.querySelector("h1");
@@ -20,8 +28,12 @@ var resetBtn = document.querySelector("#resetBtn");
 var easyBtn = document.querySelector("#easyBtn");
 var hardBtn = document.querySelector("#hardBtn");
 
+//Sound 
 var wrongSound = document.getElementById("wrongSound");
 var correctSound = document.getElementById("correctSound");
+
+//Progress bar (still testing)
+var progressDisplay = document.querySelector("progress");
 
 init();
 
@@ -36,6 +48,7 @@ function init() {
     setButtonListener();
     newRound();
 }
+
 function newRound() {
     colors = generateRandomColors(numSquares);
     pickedColor = pickColor();
@@ -45,10 +58,43 @@ function newRound() {
     h1.style.background = "rgb(23,78,140)";
     
     messageDisplay.textContent = "Round: " + gameRound + " / " + gameRoundMax;
-    oneRoundScore = numSquares * 10 - 10;
+    oneRoundScore = numSquares * missPenalty - missPenalty;  //50
+    progress = 150;
+    missPenaltySum = 0;
+    timePenaltySum = 0;
+
+    //showScore();
+    if(penaltyTimer || progressTimer){
+        clearInterval(penaltyTimer);
+        clearInterval(progressTimer);
+    }
+
+    penaltyTimer = setInterval(invokeTimePenalty, 3000);
+    progressTimer = setInterval(invokeTimeProgress, 100);
 }
+function invokeTimePenalty(){
+    oneRoundScore -= timePenalty;
+    timePenaltySum += timePenalty;  //debug
+    //showScore();
+}
+function invokeTimeProgress(){
+    progress -= 0.1;
+    progressDisplay.setAttribute("value", progress);
+}
+
 function reset(){
     init();
+}
+function showScore(){
+    scoreDisplay.textContent = score + " / +"+ oneRoundScore;
+    scoreDisplay.style.display = "inherit";
+}
+function debug(){
+    var message = "Total score: " + score 
+                + "\nThis round remaining score: "+ oneRoundScore
+                + "\nThis round miss penalty: "+ missPenaltySum
+                + "\nThis round time penalty: "+ timePenaltySum;
+    console.log(message);
 }
 function squareListener(){
     var clickedColor = this.style.background;
@@ -59,9 +105,11 @@ function squareListener(){
         correctSound.play();
         changeAllSquaresColor(pickedColor);
         h1.style.background = clickedColor;
-        
-        score += oneRoundScore;
-        scoreDisplay.textContent = "Your score is " + score * 4;
+        if(oneRoundScore > 0){
+            score += oneRoundScore;
+        }
+        //showScore();        
+
         if(gameRound === gameRoundMax){
             gameOver();
         } else {
@@ -73,7 +121,9 @@ function squareListener(){
         wrongSound.play();
         //messageDisplay.textContent = "Try again";
 
-        oneRoundScore -= 10;
+        oneRoundScore -= missPenalty;
+        missPenaltySum += missPenalty;  //debug
+        //showScore();
     }
 }
 function setSquaresListener() {
@@ -85,8 +135,9 @@ function gameOver(){
     for (var i = 0; i < squares.length; i++) {
         squares[i].removeEventListener("click", squareListener);
     }
-    messageDisplay.textContent = "Game Over";
+    scoreDisplay.textContent = "Your score is " + score * 4;
     scoreDisplay.style.display = "inherit";
+    messageDisplay.textContent = "Game Over";
 }
 function setSquaresDisplay(color) {
     for (var i = 0; i < squares.length; i++) {
@@ -106,17 +157,17 @@ function setButtonListener(color) {
         this.classList.add("selected");
         hardBtn.classList.remove("selected");
         numSquares = 3;
-        reset();
+        init();
     });
     hardBtn.addEventListener("click", function() {
         mode = "hard";
         this.classList.add("selected");
         easyBtn.classList.remove("selected");
         numSquares = 6;
-        reset();
+        init();
     });
     resetBtn.addEventListener("click", function() {
-        reset();
+        init();
     });
 }
 function changeAllSquaresColor(color) {
@@ -126,6 +177,7 @@ function changeAllSquaresColor(color) {
 }
 function pickColor() {
     var pickedColor = Math.floor(Math.random() * colors.length);
+    //pickedColor=0;  //fixed answer for debuging 
     return colors[pickedColor];
 }
 function generateRandomColors(number) {

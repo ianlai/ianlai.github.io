@@ -13,6 +13,12 @@ body{
 	background: white;
 	text-align: center;
 }
+
+/*now testing */
+progress{   
+	width: 100%;
+	display: none;
+}
 .square{
 	background: purple;
 	width: 30%;
